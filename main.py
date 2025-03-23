@@ -21,7 +21,17 @@ def preprocess_image(image):
     
     return cleaned  #returning the cleaned image
 
-
+def extract_text(image):
+    custom_config = r'--oem 3 --psm 6 -c preserve_interword_spaces=1'
+    #hamhe configurations tessaract ko provide karni hai hence--->oem->ocr engine mode
+    # page segmentation mode
+    # preserve spaces between the word
+    try:
+        text = pytesseract.image_to_string(image, config=custom_config)
+        return text.strip()
+    except Exception as e:
+        print("Error during OCR:", e)
+        return ""
 
 if _name_ == "_main_":
     image_path = "pic1.png"
