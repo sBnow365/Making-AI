@@ -21,3 +21,25 @@ def preprocess_image(image):
     
     return cleaned  #returning the cleaned image
 
+
+
+if _name_ == "_main_":
+    image_path = "pic1.png"
+    processed, original = scan_document(image_path)
+    if processed is not None:
+        cv2.imwrite("processed_output.png", processed)
+        print("Processed image saved as 'processed_output.png'.")
+        
+        text = extract_text(processed)
+        with open("extracted_text.txt", "w", encoding="utf-8") as f:
+            f.write(text)# saving the extracted text to extracted text.txt
+        print("Extracted text saved to 'extracted_text.txt'.")
+        
+        print("\nOCR Text Extraction Result:")
+        print(text)
+        
+        cv2.imshow("Original Document", original)
+        cv2.imshow("Processed Document", processed)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
