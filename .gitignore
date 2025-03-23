@@ -1,0 +1,9 @@
+__pycache__/backend.cpython-311.pyc
+
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+!pic1.png
+!pic2.png
