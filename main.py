@@ -32,6 +32,15 @@ def extract_text(image):
     except Exception as e:
         print("Error during OCR:", e)
         return ""
+def scan_document(image_path):
+    image = cv2.imread(image_path)
+    if image is None:#image type agar wrong hoga yaha check
+        print("Could not load the image. Check the path!")
+        return None, None
+    # we use the whole image as the document
+    processed = preprocess_image(image)
+    return processed, image
+
 
 if _name_ == "_main_":
     image_path = "pic1.png"
