@@ -46,6 +46,16 @@ class OCRApp:
         self.text_area = scrolledtext.ScrolledText(root, height=20, width=90, wrap=tk.WORD)
         self.text_area.pack(pady=20)
 
+        # buttons for saving text and image
+        save_button_frame = tk.Frame(root, bg="white")
+        save_button_frame.pack(pady=10)
+
+        self.save_text_btn = tk.Button(save_button_frame, text="💾 Save Text", command=self.save_text, state=tk.DISABLED)
+        self.save_text_btn.grid(row=0, column=0, padx=5)
+
+        self.save_img_btn = tk.Button(save_button_frame, text="💾 Save Image", command=self.save_image, state=tk.DISABLED)
+        self.save_img_btn.grid(row=0, column=1, padx=5)
+
     #this opens a dialog and asks the user to enter file form their system
     def upload_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
@@ -75,8 +85,34 @@ class OCRApp:
             self.text_area.delete("1.0", tk.END)
             self.text_area.insert(tk.END, text)
 
+            self.save_text_btn.config(state=tk.NORMAL)
+            self.save_img_btn.config(state=tk.NORMAL)
         else:
             messagebox.showerror("Error", "Could not process image.")
+
+    def save_text(self):
+        text_content = self.text_area.get("1.0", tk.END).strip()
+        if not text_content:
+            messagebox.showerror("Error", "No text to save.")
+            return
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt",
+                                                 filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
+        if file_path:
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write(text_content)
+            messagebox.showinfo("Success", "Text saved successfully!")
+
+    def save_image(self):
+        if self.processed_image is None:
+            messagebox.showerror("Error", "No processed image to save.")
+            return
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".png",
+                                                 filetypes=[("PNG Files", "*.png"), ("JPEG Files", "*.jpg"), ("All Files", "*.*")])
+        if file_path:
+            cv2.imwrite(file_path, self.processed_image)
+            messagebox.showinfo("Success", "Image saved successfully!")
 
     def display_image(self, file_path, widget):
         image = Image.open(file_path)
