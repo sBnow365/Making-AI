@@ -4,6 +4,9 @@ from PIL import Image, ImageTk
 import cv2
 import backend
 import os
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
 
 class OCRApp:
     def __init__(self, root):
@@ -59,6 +62,9 @@ class OCRApp:
         self.save_img_btn = tk.Button(save_button_frame, text="💾 Save Image", command=self.save_image, state=tk.DISABLED)
         self.save_img_btn.grid(row=0, column=2, padx=5)
 
+        self.save_pdf_btn = tk.Button(save_button_frame, text="📄 Save as PDF", command=self.save_as_pdf, state=tk.DISABLED)
+        self.save_pdf_btn.grid(row=0, column=2, padx=5)
+
     # Opens a dialog and asks the user to enter a file from their system
     def upload_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
@@ -91,11 +97,13 @@ class OCRApp:
             self.save_text_btn.config(state=tk.NORMAL)
             self.copy_text_btn.config(state=tk.NORMAL)  # Enable copy button
             self.save_img_btn.config(state=tk.NORMAL)
+            self.save_pdf_btn.config(state=tk.NORMAL)
+
         else:
             messagebox.showerror("Error", "Could not process image.")
 
     def save_text(self):
-        text_content = self.text_area.get("1.0", tk.END).strip()
+        text_content = self.text_area.get("1.0",tk.END).strip()
         if not text_content:
             messagebox.showerror("Error", "No text to save.")
             return
@@ -129,6 +137,30 @@ class OCRApp:
         if file_path:
             cv2.imwrite(file_path, self.processed_image)
             messagebox.showinfo("Success", "Image saved successfully!")
+
+    def save_as_pdf(self):
+        text_content = self.text_area.get("1.0", tk.END).strip()
+        if not text_content:
+            messagebox.showerror("Error", "No text to save as PDF.")
+            return
+
+        file_path = filedialog.asksaveasfilename(defaultextension=".pdf",
+                                                filetypes=[("PDF Files", "*.pdf")])
+        if file_path:
+            try:
+                c = canvas.Canvas(file_path, pagesize=letter)
+                c.setFont("Helvetica", 12)
+
+                y_position = 750  # Starting position for text
+                for line in text_content.split("\n"):
+                    c.drawString(50, y_position, line)
+                    y_position -= 20  # Move to the next line
+                
+                c.save()
+                messagebox.showinfo("Success", "PDF saved successfully!")
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not save PDF: {e}")
+
 
     def display_image(self, file_path, widget):
         image = Image.open(file_path)
