@@ -16,7 +16,7 @@ class OCRApp:
         self.processed_image = None
         self.gray_image = None
 
-        #for actions with image and extracted text
+        # For actions with image and extracted text
         button_frame = tk.Frame(root, bg="white")
         button_frame.pack(pady=10)
 
@@ -26,7 +26,7 @@ class OCRApp:
         self.process_btn = tk.Button(button_frame, text="🛠 Process Image", command=self.process_image, state=tk.DISABLED)
         self.process_btn.grid(row=0, column=1, padx=5)
 
-        #display images
+        # Display images
         img_frame = tk.Frame(root, bg="white")
         img_frame.pack()
 
@@ -42,24 +42,27 @@ class OCRApp:
         self.proc_img_display = tk.Label(img_frame, bg="white")
         self.proc_img_display.grid(row=1, column=1, padx=20)
 
-        # text area
+        # Text area
         self.text_area = scrolledtext.ScrolledText(root, height=20, width=90, wrap=tk.WORD)
         self.text_area.pack(pady=20)
 
-        # buttons for saving text and image
+        # Buttons for saving text, image, and copying text
         save_button_frame = tk.Frame(root, bg="white")
         save_button_frame.pack(pady=10)
 
         self.save_text_btn = tk.Button(save_button_frame, text="💾 Save Text", command=self.save_text, state=tk.DISABLED)
         self.save_text_btn.grid(row=0, column=0, padx=5)
 
-        self.save_img_btn = tk.Button(save_button_frame, text="💾 Save Image", command=self.save_image, state=tk.DISABLED)
-        self.save_img_btn.grid(row=0, column=1, padx=5)
+        self.copy_text_btn = tk.Button(save_button_frame, text="📋 Copy Text", command=self.copy_text, state=tk.DISABLED)
+        self.copy_text_btn.grid(row=0, column=1, padx=5)
 
-    #this opens a dialog and asks the user to enter file form their system
+        self.save_img_btn = tk.Button(save_button_frame, text="💾 Save Image", command=self.save_image, state=tk.DISABLED)
+        self.save_img_btn.grid(row=0, column=2, padx=5)
+
+    # Opens a dialog and asks the user to enter a file from their system
     def upload_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg")])
-        #the allowed extensions 
+        # Allowed extensions
         if not file_path:
             return
         
@@ -72,7 +75,7 @@ class OCRApp:
         if not self.image_path:
             return
         
-        #using method from backend imported
+        # Using method from backend
         gray, processed, _, text = backend.process_and_extract(self.image_path)
 
         if processed is not None:
@@ -86,6 +89,7 @@ class OCRApp:
             self.text_area.insert(tk.END, text)
 
             self.save_text_btn.config(state=tk.NORMAL)
+            self.copy_text_btn.config(state=tk.NORMAL)  # Enable copy button
             self.save_img_btn.config(state=tk.NORMAL)
         else:
             messagebox.showerror("Error", "Could not process image.")
@@ -102,6 +106,18 @@ class OCRApp:
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(text_content)
             messagebox.showinfo("Success", "Text saved successfully!")
+
+    def copy_text(self):
+        """Copies the extracted text to the clipboard"""
+        text_content = self.text_area.get("1.0", tk.END).strip()
+        if not text_content:
+            messagebox.showerror("Error", "No text to copy.")
+            return
+
+        self.root.clipboard_clear()
+        self.root.clipboard_append(text_content)
+        self.root.update()  # Ensure the clipboard updates
+        messagebox.showinfo("Success", "Text copied to clipboard!")
 
     def save_image(self):
         if self.processed_image is None:
