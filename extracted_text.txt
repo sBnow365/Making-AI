@@ -26,13 +26,10 @@ Table of Content
 
 Features of AIML
 
-¢ data-driven: The user's queries are predefined as conditions and mapped with particular actions for generating
-automated responses for users.
+¢ data-driven: The user's queries are predefined as conditions and mapped with particular actions for generating automated responses for users.
 
-* Rule-based Scripting language: If the conditions get satisfied, it performs an action based on the rule; if the condition
-does not get satisfied, then it stops.
+* Rule-based Scripting language: If the conditions get satisfied, it performs an action based on the rule; if the condition does not get satisfied, then it stops.
 
-* XML-based: AIML is easy to learn for programmers who know HTML or XML because it has a similar syntax to HTML
-and XML. It enables integration with XML editors using XML syntax.
+* XML-based: AIML is easy to learn for programmers who know HTML or XML because it has a similar syntax to HTML and XML. It enables integration with XML editors using XML syntax.
 
 * Flexibility: Customized tags and functions can be created for efficient code writing in development.

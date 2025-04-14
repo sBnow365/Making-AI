@@ -4,12 +4,10 @@ from PIL import Image, ImageTk
 import cv2
 import backend
 from table_extractor import extract_tables_from_image, cells_to_csv
-from table_extractor import extract_tables_from_image, cells_to_csv
 import os
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
+from reportlab.lib.utils import simpleSplit
 
 class OCRApp:
     def __init__(self, root):
@@ -144,7 +142,6 @@ class OCRApp:
         if not self.image_path:
             return
 
-
         gray, processed, _, text = backend.process_and_extract(self.image_path)
 
         if processed is not None:
@@ -201,20 +198,27 @@ class OCRApp:
             cv2.imwrite(file_path, self.processed_image)
 
     def save_as_pdf(self):
-        # Save extracted text as a PDF
         file_path = filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
         if not file_path:
             return
+
         c = canvas.Canvas(file_path, pagesize=letter)
-        text = self.text_area.get("1.0", tk.END)
-        lines = text.strip().split('\n')
-        y = 750
+        width, height = letter
+
+        text = self.text_area.get("1.0", tk.END).strip()
+        lines = text.split('\n')
+        y = height - 50  # starting point from top
+
         for line in lines:
-            c.drawString(30, y, line)
-            y -= 15
-            if y < 50:
-                c.showPage()
-                y = 750
+            # Wrap line based on width
+            wrapped = simpleSplit(line, 'Helvetica', 12, width - 60)  # 30 left margin + 30 right margin
+            for wline in wrapped:
+                c.drawString(30, y, wline)
+                y -= 15
+                if y < 50:
+                    c.showPage()
+                    y = height - 50
+
         c.save()
 
 
