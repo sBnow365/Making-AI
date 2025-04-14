@@ -4,7 +4,10 @@ from PIL import Image, ImageTk
 import cv2
 import backend
 from table_extractor import extract_tables_from_image, cells_to_csv
+from table_extractor import extract_tables_from_image, cells_to_csv
 import os
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
@@ -12,6 +15,7 @@ class OCRApp:
     def __init__(self, root):
         self.root = root
         self.root.title("OCR Document Scanner")
+        self.root.geometry("1000x750")
         self.root.geometry("1000x750")
         self.root.configure(bg="white")
 
@@ -140,6 +144,7 @@ class OCRApp:
         if not self.image_path:
             return
 
+
         gray, processed, _, text = backend.process_and_extract(self.image_path)
 
         if processed is not None:
@@ -152,6 +157,10 @@ class OCRApp:
             self.text_area.delete("1.0", tk.END)
             self.text_area.insert(tk.END, text)
 
+            self.save_text_btn.config(state=tk.NORMAL)
+            self.copy_text_btn.config(state=tk.NORMAL)
+            self.save_img_btn.config(state=tk.NORMAL)
+            self.save_pdf_btn.config(state=tk.NORMAL)
             self.save_text_btn.config(state=tk.NORMAL)
             self.copy_text_btn.config(state=tk.NORMAL)
             self.save_img_btn.config(state=tk.NORMAL)
