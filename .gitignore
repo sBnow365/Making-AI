@@ -4,6 +4,12 @@ __pycache__/backend.cpython-311.pyc
 *.jpg
 *.jpeg
 *.gif
+*.txt
 
 !pic1.png
 !pic2.png
+frontend.py
+*.pdf
+*.txt
+extracted_text.txt
+__pycache__/table_extractor.cpython-311.pyc
