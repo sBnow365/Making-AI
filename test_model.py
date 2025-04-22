@@ -8,8 +8,8 @@ from sklearn.metrics import precision_score, recall_score, f1_score, confusion_m
 import matplotlib
 import matplotlib.pyplot as plt
 
-# Set matplotlib backend (try different options if this doesn't work)
-matplotlib.use('TkAgg')  # Alternatives: 'Qt5Agg', 'GTK3Agg', 'WebAgg'
+# Set matplotlib backend
+matplotlib.use('TkAgg')
 
 # Dataset paths
 img_dir = 'dataset/img'
@@ -28,7 +28,7 @@ lev_dist_sum = 0
 y_true_chars = []
 y_pred_chars = []
 
-# Additional metrics collections
+# Additional metrics
 lev_distances = []
 word_lengths = []
 is_correct = []
@@ -51,12 +51,14 @@ for img_file in tqdm(image_files, total=total):
         continue
 
     pred = extract_text(processed).strip().lower()
-    
+
+    print("Predicted: ", pred)
+    print("Actual: ", gt)
     # Word-level accuracy
     word_correct = pred == gt
     if word_correct:
         correct_words += 1
-    
+
     # Character-level stats
     min_len = min(len(pred), len(gt))
     correct_chars += sum(p == g for p, g in zip(pred, gt))
@@ -77,18 +79,26 @@ for img_file in tqdm(image_files, total=total):
                                dp[i][j - 1] + 1,
                                dp[i - 1][j - 1] + cost)
         return dp[len_s1][len_s2]
-    
+
     lev_dist = levenshtein_distance(pred, gt)
     lev_dist_sum += lev_dist
     lev_distances.append(lev_dist)
 
-    # For precision/recall/F1: character-wise comparison
-    y_true_chars.extend(list(gt))
-    y_pred_chars.extend(list(pred[:len(gt)]))  # match length
+    # Pad both strings to match lengths
+    max_len = max(len(gt), len(pred))
+    gt_padded = gt.ljust(max_len)
+    pred_padded = pred.ljust(max_len)
+
+    y_true_chars.extend(list(gt_padded))
+    y_pred_chars.extend(list(pred_padded))
 
     # For word length analysis
     word_lengths.append(len(gt))
     is_correct.append(1 if word_correct else 0)
+
+# Filter out character pairs that are both padding
+filtered = [(t, p) for t, p in zip(y_true_chars, y_pred_chars) if t.strip() != '' or p.strip() != '']
+y_true_chars, y_pred_chars = zip(*filtered) if filtered else ([], [])
 
 # Final calculations
 word_accuracy = (correct_words / total) * 100
@@ -109,15 +119,13 @@ print(f"🎯 Precision:                {precision:.4f}")
 print(f"📈 Recall:                   {recall:.4f}")
 print(f"🏆 F1 Score:                 {f1:.4f}")
 
-
-
-# Character Error Heatmap (if character set is small)
-if len(set(y_true_chars)) <= 30:
+# Character Confusion Heatmap
+if len(set(y_true_chars)) <= 100:
     chars = sorted(set(y_true_chars))
     cm = confusion_matrix(y_true_chars, y_pred_chars, labels=chars)
-    
+
     plt.figure(figsize=(12, 8))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=chars, yticklabels=chars,
                 cbar_kws={'label': 'Number of Errors'})
     plt.title('Character Confusion Matrix', fontweight='bold')
@@ -127,4 +135,3 @@ if len(set(y_true_chars)) <= 30:
     plt.yticks(rotation=0)
     plt.tight_layout()
     plt.show()
-
