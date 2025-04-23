@@ -32,7 +32,7 @@ y_pred_chars = []
 lev_distances = []
 word_lengths = []
 is_correct = []
-wrong_predictions = []  # Track wrongly predicted images
+wrong_predictions = []  # To store details of incorrect predictions
 
 for img_file in tqdm(image_files, total=total):
     img_path = os.path.join(img_dir, img_file)
@@ -61,10 +61,13 @@ for img_file in tqdm(image_files, total=total):
     if word_correct:
         correct_words += 1
     else:
-        wrong_predictions.append(img_file)
+        wrong_predictions.append({
+            'filename': img_file,
+            'predicted': pred,
+            'ground_truth': gt
+        })
 
     # Character-level stats
-    min_len = min(len(pred), len(gt))
     correct_chars += sum(p == g for p, g in zip(pred, gt))
     total_chars += len(gt)
 
@@ -88,7 +91,7 @@ for img_file in tqdm(image_files, total=total):
     lev_dist_sum += lev_dist
     lev_distances.append(lev_dist)
 
-    # Pad both strings to match lengths
+    # Pad strings
     max_len = max(len(gt), len(pred))
     gt_padded = gt.ljust(max_len)
     pred_padded = pred.ljust(max_len)
@@ -96,11 +99,11 @@ for img_file in tqdm(image_files, total=total):
     y_true_chars.extend(list(gt_padded))
     y_pred_chars.extend(list(pred_padded))
 
-    # For word length analysis
+    # Word length stats
     word_lengths.append(len(gt))
     is_correct.append(1 if word_correct else 0)
 
-# Filter out character pairs that are both padding
+# Clean padding-only characters
 filtered = [(t, p) for t, p in zip(y_true_chars, y_pred_chars) if t.strip() != '' or p.strip() != '']
 y_true_chars, y_pred_chars = zip(*filtered) if filtered else ([], [])
 
@@ -109,7 +112,7 @@ word_accuracy = (correct_words / total) * 100
 char_accuracy = (correct_chars / total_chars) * 100 if total_chars > 0 else 0
 avg_lev_distance = lev_dist_sum / total if total > 0 else 0
 
-# Precision, Recall, F1 (char-wise)
+# Precision, Recall, F1
 precision = precision_score(y_true_chars, y_pred_chars, average='micro', zero_division=0)
 recall = recall_score(y_true_chars, y_pred_chars, average='micro', zero_division=0)
 f1 = f1_score(y_true_chars, y_pred_chars, average='micro', zero_division=0)
@@ -118,20 +121,22 @@ f1 = f1_score(y_true_chars, y_pred_chars, average='micro', zero_division=0)
 print("\n📊 OCR Evaluation Metrics:")
 print(f"✅ Word-Level Accuracy:     {word_accuracy:.2f}%")
 print(f"🔠 Character-Level Accuracy: {char_accuracy:.2f}%")
-print(f"✏️ Avg Levenshtein Distance: {avg_lev_distance:.2f}")
+print(f"✏ Avg Levenshtein Distance: {avg_lev_distance:.2f}")
 print(f"🎯 Precision:                {precision:.4f}")
 print(f"📈 Recall:                   {recall:.4f}")
 print(f"🏆 F1 Score:                 {f1:.4f}")
 
-# Print wrongly predicted image filenames
+# Print detailed wrong predictions
 if wrong_predictions:
-    print("\n❌ Files with incorrect predictions:")
-    for fname in wrong_predictions:
-        print(f" - {fname}")
+    print("\n❌ Incorrect Predictions:")
+    for item in wrong_predictions:
+        print(f"\n🖼 Image: {item['filename']}")
+        print(f"🔮 Predicted:     {item['predicted']}")
+        print(f"📌 Ground Truth:  {item['ground_truth']}")
 else:
-    print("\n✅ All words predicted correctly!")
+    print("\n✅ All predictions were correct!")
 
-# Character Confusion Heatmap
+# Character Confusion Matrix
 if len(set(y_true_chars)) <= 100:
     chars = sorted(set(y_true_chars))
     cm = confusion_matrix(y_true_chars, y_pred_chars, labels=chars)
