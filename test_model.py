@@ -130,7 +130,7 @@ print(f"🏆 F1 Score:                 {f1:.4f}")
 if wrong_predictions:
     print("\n❌ Incorrect Predictions:")
     for item in wrong_predictions:
-        print(f"\n🖼 Image: {item['filename']}")
+        print(f"\n🖼️ Image: {item['filename']}")
         print(f"🔮 Predicted:     {item['predicted']}")
         print(f"📌 Ground Truth:  {item['ground_truth']}")
 else:
