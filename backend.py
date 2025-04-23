@@ -3,14 +3,10 @@ import numpy as np
 import pytesseract
 from PIL import Image
 import torch
-from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 # pytesseract: A Python wrapper for Tesseract, an OCR (Optical Character Recognition) engine that extracts text from images.
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# load TrOCR model and processor globally once (for handwritten OCR)
-processor = TrOCRProcessor.from_pretrained('microsoft/trocr-small-handwritten')
-model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-small-handwritten')
 
 # optical character recognition ocr works better on grayscale
 def preprocess_image(image_path):
