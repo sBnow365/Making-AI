@@ -32,6 +32,7 @@ y_pred_chars = []
 lev_distances = []
 word_lengths = []
 is_correct = []
+wrong_predictions = []  # Track wrongly predicted images
 
 for img_file in tqdm(image_files, total=total):
     img_path = os.path.join(img_dir, img_file)
@@ -54,10 +55,13 @@ for img_file in tqdm(image_files, total=total):
 
     print("Predicted: ", pred)
     print("Actual: ", gt)
+
     # Word-level accuracy
     word_correct = pred == gt
     if word_correct:
         correct_words += 1
+    else:
+        wrong_predictions.append(img_file)
 
     # Character-level stats
     min_len = min(len(pred), len(gt))
@@ -118,6 +122,14 @@ print(f"✏️ Avg Levenshtein Distance: {avg_lev_distance:.2f}")
 print(f"🎯 Precision:                {precision:.4f}")
 print(f"📈 Recall:                   {recall:.4f}")
 print(f"🏆 F1 Score:                 {f1:.4f}")
+
+# Print wrongly predicted image filenames
+if wrong_predictions:
+    print("\n❌ Files with incorrect predictions:")
+    for fname in wrong_predictions:
+        print(f" - {fname}")
+else:
+    print("\n✅ All words predicted correctly!")
 
 # Character Confusion Heatmap
 if len(set(y_true_chars)) <= 100:
