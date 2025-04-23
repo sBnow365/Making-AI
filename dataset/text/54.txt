@@ -1,1 +1,1 @@
-pthread kill(pthread t tid, int signal)
+pthread kill(pthread_t tid, int signal)
