@@ -49,4 +49,5 @@ def cells_to_csv(cells_data, output_csv="table.csv"):
     rows.append(current_row)
 
     df = pd.DataFrame(rows)
-    df.to_csv(output_csv, index=False)
+    df.to_csv(output_csv, index=False) 
+ 
